@@ -67,6 +67,8 @@
 #define LSM_INT2_EXTI_IRQn EXTI3_IRQn
 #define LSM_CS_Pin GPIO_PIN_4
 #define LSM_CS_GPIO_Port GPIOA
+#define LD_R_Pin GPIO_PIN_12
+#define LD_R_GPIO_Port GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**
