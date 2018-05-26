@@ -22,6 +22,16 @@ LSM_StatusTypeDef LSM_Init(LSM_HandleTypeDef * hlsm) {
 	if (res != LSM_WAI)
 		return LSM_WRONG_DEVICE;
 
+	reg[0] = LSM_CTRL3_C;
+	reg[1] = 0x05;
+
+	HAL_GPIO_WritePin(hlsm->Init.CS_Port, hlsm->Init.CS_Pin, RESET);
+	if (HAL_SPI_Transmit(hlsm->Init.hspi, reg, 2, 50) != HAL_OK)
+		return LSM_SPI_ERROR;
+	HAL_GPIO_WritePin(hlsm->Init.CS_Port, hlsm->Init.CS_Pin, SET);
+
+	HAL_Delay(500);
+
 	reg[0] = LSM_CTRL1_XL;
 	reg[1] = hlsm->Init.CTRL1_XL;
 
@@ -82,7 +92,7 @@ LSM_StatusTypeDef LSM_Init(LSM_HandleTypeDef * hlsm) {
 
 	}
 
-	if(hlsm->Init.CTRL2_G & (1 << FS125))
+	if (hlsm->Init.CTRL2_G & (1 << FS125))
 		hlsm->Gscale = 381;
 
 	return LSM_OK;
@@ -122,7 +132,7 @@ LSM_StatusTypeDef LSM_GetData(LSM_HandleTypeDef * hlsm, int32_t * data) {
 	data[0] = int16to32(&buffor);
 	data[0] = data[0] * 100 / (hlsm->XLscale);
 
-	buffor =  ((tmp[9] << 8) | (tmp[8]));
+	buffor = ((tmp[9] << 8) | (tmp[8]));
 	data[1] = int16to32(&buffor);
 	data[1] = data[1] * 100 / (hlsm->XLscale);
 
@@ -158,17 +168,17 @@ int32_t int16to32(int16_t * data) {
 	return out;
 }
 
-bool LSM_isDataReady(LSM_HandleTypeDef * hlsm){
+bool LSM_isDataReady(LSM_HandleTypeDef * hlsm) {
 	bool tmp = hlsm->int1;
 	hlsm->int1 = false;
 	//TODO check which int is responsible for data if any
 	return tmp;
 }
 
-inline void LSM_INT1fromISR(LSM_HandleTypeDef * hlsm){
+inline void LSM_INT1fromISR(LSM_HandleTypeDef * hlsm) {
 	hlsm->int1 = true;
 }
 
-inline void LSM_INT2fromISR(LSM_HandleTypeDef * hlsm){
+inline void LSM_INT2fromISR(LSM_HandleTypeDef * hlsm) {
 	hlsm->int2 = true;
 }

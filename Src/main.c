@@ -103,7 +103,7 @@ uint8_t LSM_Setup() {
 int main(void) {
 	/* USER CODE BEGIN 1 */
 	uint8_t message[200];
-	uint8_t messageLength, lsmCode;
+	uint8_t messageLength, lsmCode, counter;
 	int32_t XYZ[6];
 	uint32_t interval = 0, prev = 0, current = 0;
 
@@ -131,6 +131,8 @@ int main(void) {
 	MX_SPI1_Init();
 	/* USER CODE BEGIN 2 */
 	HAL_Delay(200);
+	messageLength = sprintf((char *) message, "Starting...\r\n");
+	CDC_Transmit_FS(message, messageLength);
 
 	if ((lsmCode = LSM_Setup()) != LSM_OK) {
 		for (;;) {
@@ -172,9 +174,18 @@ int main(void) {
 					XYZ[3], XYZ[4], XYZ[5], interval);
 			CDC_Transmit_FS(message, messageLength);
 
-			HAL_GPIO_TogglePin(LD_R_GPIO_Port, LD_R_Pin);
-		}else{
+			HAL_GPIO_TogglePin(LD_G_GPIO_Port, LD_G_Pin);
+		} else {
 			HAL_Delay(5);
+			if (++counter >= 10) {
+				counter = 0;
+				if ((lsmCode = LSM_Init(&hlsm1)) != LSM_OK) {
+					messageLength = sprintf((char *) message,
+							"Init error, code: %d\r\n", lsmCode);
+					CDC_Transmit_FS(message, messageLength);
+					_Error_Handler(__FILE__, __LINE__);
+				}
+			}
 		}
 
 	}
@@ -248,6 +259,7 @@ void SystemClock_Config(void) {
  */
 void _Error_Handler(char *file, int line) {
 	/* USER CODE BEGIN Error_Handler_Debug */
+	HAL_NVIC_SystemReset();
 	/* User can add his own implementation to report the HAL error return state */
 	while (1) {
 	}

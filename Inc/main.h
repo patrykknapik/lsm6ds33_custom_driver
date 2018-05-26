@@ -59,6 +59,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define LD_G_Pin GPIO_PIN_13
+#define LD_G_GPIO_Port GPIOC
 #define LSM_INT1_Pin GPIO_PIN_2
 #define LSM_INT1_GPIO_Port GPIOA
 #define LSM_INT1_EXTI_IRQn EXTI2_IRQn
